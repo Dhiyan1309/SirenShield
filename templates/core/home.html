@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}SirenShield - Women's Safety App{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row align-items-center min-vh-75">
+        <div class="col-md-6">
+            <h1 class="display-4 mb-4">Welcome to SirenShield</h1>
+            <p class="lead mb-4">Your personal safety companion, designed to protect and empower women.</p>
+            
+            {% if user.is_authenticated %}
+                {% if not user.userprofile.is_safety_mode_active %}
+                    <a href="{% url 'safety_mode' %}" class="btn safety-button">
+                        <i class="fas fa-shield-alt"></i> Activate Safety Mode
+                    </a>
+                {% else %}
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> Safety Mode is Active
+                        <a href="{% url 'safety_dashboard' %}" class="btn btn-outline-success ms-3">View Dashboard</a>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="d-grid gap-2 d-md-block">
+                    <a href="{% url 'account_login' %}" class="btn btn-primary me-md-2">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                    <a href="{% url 'register' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-user-plus"></i> Register
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-6">
+            <!-- Safety illustration removed -->
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">Key Features</h2>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-shield-alt fa-3x text-danger mb-3"></i>
+                    <h3 class="card-title">Safety Mode</h3>
+                    <p class="card-text">Activate safety mode to enable real-time monitoring and emergency alerts.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-bell fa-3x text-danger mb-3"></i>
+                    <h3 class="card-title">Emergency Alerts</h3>
+                    <p class="card-text">Quick access to emergency services and automatic alerts to your trusted contacts.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-map-marker-alt fa-3x text-danger mb-3"></i>
+                    <h3 class="card-title">Location Tracking</h3>
+                    <p class="card-text">Real-time location sharing and directions to the nearest safe locations.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">How It Works</h2>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="text-center">
+                <div class="rounded-circle bg-danger text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <span class="h4 mb-0">1</span>
+                </div>
+                <h4>Register</h4>
+                <p>Create your account and add emergency contacts</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="text-center">
+                <div class="rounded-circle bg-danger text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <span class="h4 mb-0">2</span>
+                </div>
+                <h4>Activate</h4>
+                <p>Enable safety mode when you need protection</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="text-center">
+                <div class="rounded-circle bg-danger text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <span class="h4 mb-0">3</span>
+                </div>
+                <h4>Monitor</h4>
+                <p>Voice detection and location tracking</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="text-center">
+                <div class="rounded-circle bg-danger text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <span class="h4 mb-0">4</span>
+                </div>
+                <h4>Alert</h4>
+                <p>Instant alerts to contacts and emergency services</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

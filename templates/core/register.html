@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Register - SirenShield{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="text-center mb-4">Create Your Account</h2>
+                    
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-user-plus"></i> Register
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <p>Already have an account? <a href="{% url 'account_login' %}">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

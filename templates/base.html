@@ -1,0 +1,212 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SirenShield{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background: url("{% static 'images/sirenshield-logo.png' %}") no-repeat center center fixed;
+            background-size: cover;
+            background-color: #f8f9fa;
+        }
+        .background-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.7);
+            z-index: 0;
+            pointer-events: none;
+        }
+        main, .container, .card, nav, footer {
+            position: relative;
+            z-index: 1;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: #dc3545 !important;
+        }
+        .safety-button {
+            background-color: #dc3545;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+        }
+        .safety-button:hover {
+            background-color: #c82333;
+            transform: scale(1.05);
+        }
+        .emergency-button {
+            background-color: #dc3545;
+            color: white;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 1.5em;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .emergency-button:hover {
+            background-color: #c82333;
+            transform: scale(1.1);
+        }
+        .leaflet-container {
+            height: 400px;
+            width: 100%;
+            border-radius: 8px;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="fas fa-shield-alt"></i> SirenShield
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'profile' %}">
+                                <i class="fas fa-user"></i> Profile
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'safety_mode' %}">
+                                <i class="fas fa-shield-alt"></i> Safety Mode
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'account_logout' %}">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'account_login' %}">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}">
+                                <i class="fas fa-user-plus"></i> Register
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Emergency Button (only shown when safety mode is active) -->
+    {% if user.is_authenticated and user.userprofile.is_safety_mode_active %}
+        <button class="emergency-button" id="emergencyButton">
+            <i class="fas fa-exclamation-triangle"></i> EMERGENCY
+        </button>
+    {% endif %}
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // Emergency Button Handler
+        document.getElementById('emergencyButton')?.addEventListener('click', function() {
+            if (confirm('Are you sure you want to send an emergency alert?')) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    fetch('/emergency-alert/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            type: 'manual',
+                            latitude: latitude,
+                            longitude: longitude,
+                            map_link: `https://maps.google.com/?q=${latitude},${longitude}`,
+                            description: 'Manual emergency alert triggered'
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert('Emergency alert sent successfully!');
+                        } else {
+                            alert('Error sending emergency alert. Please try again.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error sending emergency alert. Please try again.');
+                    });
+                });
+            }
+        });
+
+        // CSRF Token Helper
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

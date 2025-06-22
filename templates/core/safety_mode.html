@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Safety Mode - SirenShield{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="text-center mb-4">Activate Safety Mode</h2>
+                    
+                    <div class="alert alert-info mb-4">
+                        <h4 class="alert-heading"><i class="fas fa-info-circle"></i> How Safety Mode Works</h4>
+                        <p>When Safety Mode is active:</p>
+                        <ul>
+                            <li>Your location will be tracked in real-time</li>
+                            <li>Voice detection will monitor for distress signals</li>
+                            <li>Emergency contacts will be notified if an alert is triggered</li>
+                            <li>Quick access to emergency services and police stations</li>
+                        </ul>
+                    </div>
+                    
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-danger safety-button">
+                                <i class="fas fa-shield-alt"></i> Activate Safety Mode
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <p class="text-muted">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Remember: You can deactivate Safety Mode at any time from your dashboard.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
